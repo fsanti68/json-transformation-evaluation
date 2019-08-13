@@ -25,6 +25,8 @@ FreeMarker won on all criteria:
  
 The next step was to test how does FreeMarker scales. I used an Intel Core i7 8750H (2.20 - 4.10GHz) with 6 CPU cores (12 threads) computer:
 
+**1,000,000 json submitted**:
+
 ![FreeMarker CPU scalability](freemarker-cpu-benchmark.png "FreeMarker's scalability vs thread pool")
 
 
