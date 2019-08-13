@@ -1,0 +1,20 @@
+{
+  "user": {
+  	"cpf": 102302007,
+    "accounts": [
+    	{ "key": "joe7@email.com", "type": "email" },
+    	{ "key": "+551195533-0007", "type": "mobile", "contract": 92973478660007, "company": "038010401000123" },
+    	{ "key": "joe7@my.company.com", "type": "email" },
+    	{ "key": "joe7", "type": "corporate.id" }
+    ],
+    "products": [
+    	{ "account": "joe7@email.com", "combo": "netflix", "variant": "family" },
+    	{ "account": "joe7@my.company.com", "combo": "corporate/mobile", "roles": ["admin", "owner", "unused", "other"], "contract": 92973478660007, "company": "acme" },
+    	{ "account": "joe7", "combo": "github", "account-type": "private", "roles": ["user"] }
+    ],
+    "signature": {
+    	"owner": "joe7",
+    	"pub": "VGhpcyBpcyBvbmx5IGEgdGVzdDogZG8gbm90IGV4cGVjdCB0byBmaW5kIGEgcmVhbCB2YWxpZCBwdWJsaWMga2V5IGhlcmUuVGhpcyBpcyBvbmx5IGEgdGVzdDogZG8gbm90IGV4cGVjdCB0byBmaW5kIGEgcmVhbCB2YWxpZCBwdWJsaWMga2V5IGhlcmUuVGhpcyBpcyBvbmx5IGEgdGVzdDogZG8gbm90IGV4cGVjdCB0byBmaW5kIGEgcmVhbCB2YWxpZCBwdWJsaWMga2V5IGhlcmUuVGhpcyBpcyBvbmx5IGEgdGVzdDogZG8gbm90IGV4cGVjdCB0byBmaW5kIGEgcmVhbCB2YWxpZCBwdWJsaWMga2V5IGhlcmUu"
+    }
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "entries" : {
+     "p": .rating.primary.value,
+     "q": .rating.quality.value
+  },
+  "new-entries" : [ {for (.rating) .key: .value.value} ]
+}

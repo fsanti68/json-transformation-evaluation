@@ -1,0 +1,35 @@
+exemplo input:
+{
+  "rating": {
+    "primary": {
+      "value": 3
+    },
+    "quality": {
+      "value": 3
+    }
+  }
+}
+
+freemarker template:
+{
+	"entries": [
+		<#list rating as k,v> 
+		{
+			"${k}": ${v.value}
+		}
+		<#sep>,</#sep>
+		</#list>
+	]
+}
+
+resultado esperado:
+{
+	"entries": [
+		{
+			"primary": 3
+		},
+		{
+			"quality": 3
+		}
+	]
+}
