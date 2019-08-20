@@ -1,20 +1,20 @@
 {
   "user": {
-  	"cpf": 25278414812,
+  	"cpf": 30828776483,
     "accounts": [
     	{ "key": "joe@mail.com", "type": "email" },
-    	{ "key": "11 99988-3322", "type": "mobile", "contract": 92973478662653, "company": "078326873266536434" },
+    	{ "key": "11 95555-4455", "type": "mobile", "contract": 9832642736482, "company": "acme" },
     	{ "key": "joe@my.company.com", "type": "email" },
     	{ "key": "joe.bog", "type": "corporate.id" },
     	{ "key": "joe498", "type": "social", "service": "github" }
     ],
     "products": [
     	{ "account": "joe@mail.com", "combo": "netflix", "variant": "family" },
-    	{ "account": "joe@my.company.com", "combo": "corporate/mobile", "roles": ["admin", "owner", "unused", "other"], "contract": 92973478662653, "company": "acme" },
+    	{ "account": "joe@my.company.com", "combo": "corporate/mobile", "roles": ["admin", "owner", "unused", "other"], "contract": 9832642736482, "company": "acme" },
     	{ "account": "joe498", "combo": "github", "account-type": "private", "roles": ["user"] }
     ],
     "signature": {
-    	"owner": "fsanti68",
+    	"owner": "joe498",
     	"pub": "VGhpcyBpcyBvbmx5IGEgdGVzdDogZG8gbm90IGV4cGVjdCB0byBmaW5kIGEgcmVhbCB2YWxpZCBwdWJsaWMga2V5IGhlcmUu"
     }
   }

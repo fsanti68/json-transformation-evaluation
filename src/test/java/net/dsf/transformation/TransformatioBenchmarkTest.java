@@ -1,21 +1,22 @@
 package net.dsf.transformation;
 
+import static org.junit.Assert.assertNotNull;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.nio.charset.Charset;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 
-import com.bazaarvoice.jolt.Chainr;
-import com.bazaarvoice.jolt.JsonUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.schibsted.spt.data.jslt.Expression;
@@ -28,22 +29,11 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
 
 /**
- * E o campeão foi: freeMarker!!!
- * 
- * <pre>
- * Para 20k iterações:
- * - jsltTest   = 1163 ms
- * - joltTest   =  653 ms
- * - freeMarker =  586 ms
- * </pre>
- * 
- * No cálculo foram desconsideradas a carga dos templates e suas eventuais
- * compilações/preparações.
- * 
- * A diferença apurada entre Jolt e o FreeMarker é mínima (em algumas execuções,
- * o Jolt foi ligeiramente mais rápido). Contudo, a flexibilidade e o suporte ao
- * FreeMarker é bem maior, até por que ele é muito usado em outros cenários
- * (páginas dinâmicas, e-mails, etc).
+ * Premissas:
+ * <ul>
+ * <li>cada serviço recebe e deve retornar uma string</li>
+ * <li>cada biblioteca deverá produzir os mesmos JSON</li>
+ * </ul>
  * 
  * @author Fabio De Santi
  *
@@ -54,7 +44,7 @@ public class TransformatioBenchmarkTest {
 
 	private static Configuration cfg;
 
-	private static final int ITERATIONS = 20000;
+	public static final int ITERATIONS = 1000000;
 
 	private ObjectMapper mapper = new ObjectMapper();
 
@@ -75,51 +65,35 @@ public class TransformatioBenchmarkTest {
 		cfg.setWrapUncheckedExceptions(true);
 	}
 
-	@Test
-	public void freeMarkerTest() throws IOException, TemplateException {
-
-		logger.info("FREEMARKER TEST");
-		Template template = cfg.getTemplate("freemarker-0.ftl");
-		JsonNode output = null;
-		long ms = 0L;
-		for (int i = 0; i < ITERATIONS; i++) {
-			if (i == 1) /* discard first execution (classloader-related work must not be considered) */
-				ms = System.currentTimeMillis();
-
-			JsonNode input = mapper.readTree(ClassLoader.getSystemResourceAsStream("sample-input-0.json"));
-			@SuppressWarnings("unchecked")
-			Map<String, Object> map = mapper.convertValue(input, Map.class);
-
-			StringWriter out = new StringWriter();
-			template.process(map, out);
-			output = mapper.readTree(out.toString());
-		}
-
-		printResult("FREEMARKER", output, ms);
+	private String getInput(String resourceName) throws IOException {
+		return IOUtils.resourceToString(resourceName, Charset.forName("UTF-8"), ClassLoader.getSystemClassLoader());
 	}
 
-	@Test
-	public void freeMarkerWithThreadPoolTest() throws IOException, InterruptedException {
+	public void sleep(long ms) {
+		try {
+			Thread.sleep(ms);
+		} catch (InterruptedException e) {
+		}
+	}
 
-		logger.info("FREEMARKER (ThreadPool) TEST");
-		Template template = cfg.getTemplate("freemarker-0.ftl");
-		JsonNode output = null;
+	public long threadPoolFreeMarker(int poolSize, Template template) throws IOException, InterruptedException {
+
 		long ms = 0L;
 		CountDownLatch cdl = new CountDownLatch(ITERATIONS);
-		ThreadPoolExecutor tpe = (ThreadPoolExecutor) Executors.newFixedThreadPool(6);
-		for (int i = 0; i < ITERATIONS; i++) {
-			if (i == 1) /* discard first execution (classloader-related work must not be considered) */
-				ms = System.currentTimeMillis();
+		ThreadPoolExecutor tpe = (ThreadPoolExecutor) Executors.newFixedThreadPool(poolSize);
+		String source = getInput("sample-input.json").toString();
+		ms = System.currentTimeMillis();
 
+		for (int l = 0; l < ITERATIONS; l++) {
 			tpe.submit(() -> {
 				try {
-					JsonNode input = mapper.readTree(ClassLoader.getSystemResourceAsStream("sample-input-0.json"));
+					// string to Map required by freemarker
 					@SuppressWarnings("unchecked")
-					Map<String, Object> map = mapper.convertValue(input, Map.class);
+					Map<String, Object> map = mapper.readValue(source.getBytes(), Map.class);
 
-					StringWriter out = new StringWriter();
+					StringWriter out = new StringWriter(4096);
 					template.process(map, out);
-					mapper.readTree(out.toString());
+					assertNotNull(out.toString()); // our test case expects result as string
 					cdl.countDown();
 
 				} catch (IOException | TemplateException e) {
@@ -127,40 +101,19 @@ public class TransformatioBenchmarkTest {
 				}
 			});
 		}
-		while (cdl.getCount() > 0L) {
-			Thread.sleep(10L);
-		}
-		logger.info(String.format("Final count: %d", cdl.getCount()));
-
-		printResult("FREEMARKER(TP)", output, ms);
+		cdl.await();
+		return ms;
 	}
 
-	@Test
-	public void joltTest() {
+	public long threadPoolJSLT(int poolSize) throws IOException, InterruptedException {
 
-		logger.info("JOLT TEST");
-		List<Object> specs = JsonUtils.classpathToList("/sample-spec-0.json");
-		Chainr chainr = Chainr.fromSpec(specs);
-
-		Object transformedOutput = null;
 		long ms = 0L;
-		for (int i = 0; i < ITERATIONS; i++) {
-			if (i == 1) /* discard first execution (classloader-related work must not be considered) */
-				ms = System.currentTimeMillis();
+		CountDownLatch cdl = new CountDownLatch(ITERATIONS);
+		ThreadPoolExecutor tpe = (ThreadPoolExecutor) Executors.newFixedThreadPool(poolSize);
 
-			Object inputJSON = JsonUtils.classpathToObject("/sample-input-0.json");
-			transformedOutput = chainr.transform(inputJSON);
-		}
-		printResult("JOLT", transformedOutput, ms);
-	}
+		String source = getInput("sample-input.json");
 
-	@Test
-	public void jsltTest() throws IOException {
-
-		logger.info("JSLT TEST");
-		JsonNode output = null;
-		long ms = 0L;
-		try (InputStream is = ClassLoader.getSystemResourceAsStream("sample-jslt-0.json")) {
+		try (InputStream is = ClassLoader.getSystemResourceAsStream("jslt-template.json")) {
 			try (Scanner s = new Scanner(is)) {
 				s.useDelimiter("\n");
 				StringBuilder sb = new StringBuilder();
@@ -169,35 +122,93 @@ public class TransformatioBenchmarkTest {
 					sb.append(s.next());
 				}
 				String transform = sb.toString();
+				Expression jslt = Parser.compileString(transform);
 
-				for (int i = 0; i < ITERATIONS; i++) {
-					if (i == 1) /* discard first execution (classloader-related work must not be considered) */
-						ms = System.currentTimeMillis();
+				ms = System.currentTimeMillis();
+				for (int l = 0; l < ITERATIONS; l++) {
 
-					JsonNode input = mapper.readTree(ClassLoader.getSystemResourceAsStream("sample-input-0.json"));
+					tpe.submit(() -> {
+						try {
+							// string to JsonNode required by JSLT
+							JsonNode o = mapper.readTree(source);
 
-					Expression jslt = Parser.compileString(transform);
-					output = jslt.apply(input);
+							JsonNode json = jslt.apply(o);
+							assertNotNull(json.asText()); // our test case expects result as string
+							cdl.countDown();
+
+						} catch (IOException e) {
+						}
+					});
 				}
 			}
 		}
-		printResult("JSLT", output, ms);
+		cdl.await();
+		return ms;
 	}
 
-	private void printResult(String method, Object json, long startTimeMs) {
+	@Test
+	public void freeMarkerTest() throws IOException, TemplateException, InterruptedException {
+
+		logger.info("FREEMARKER TEST");
+		Template template = cfg.getTemplate("freemarker-template.ftl");
+
+		// discard first n executions
+		threadPoolFreeMarker(1, template);
+		sleep(2000L);
+
+		long ms = threadPoolFreeMarker(1, template);
+		printResult("FREEMARKER", ms);
+	}
+
+	@Test
+	public void freeMarkerWithThreadPoolTest() throws IOException, InterruptedException {
+
+		logger.info("FREEMARKER (ThreadPool) TEST");
+		Template template = cfg.getTemplate("freemarker-template.ftl");
+
+		// discard first n executions
+		threadPoolFreeMarker(1, template);
+		sleep(2000L);
+
+		long ms = threadPoolFreeMarker(6, template);
+		printResult("FREEMARKER(TP)", ms);
+	}
+
+	@Test
+	public void jsltTest() throws IOException, InterruptedException {
+
+		logger.info("JSLT TEST");
+
+		// discard first n executions
+		threadPoolJSLT(1);
+
+		long ms = threadPoolJSLT(1);
+		printResult("JSLT", ms);
+	}
+
+	@Test
+	public void jsltWithThreadPoolTest() throws IOException, InterruptedException {
+
+		logger.info("JSLT (ThreadPool) TEST");
+
+		long ms = threadPoolJSLT(6);
+		printResult("JSLT(TP)", ms);
+	}
+
+	private void printResult(String method, long startTimeMs) {
 
 		long elapsedMs = System.currentTimeMillis() - startTimeMs;
-		String result = JsonUtils.toPrettyJsonString(json);
-		logger.info("RESULT (" + method + ") " + elapsedMs + " ms: " + result);
+		logger.info("RESULT (" + method + ") " + elapsedMs + " ms.");
 		timer.put(method, Long.valueOf(elapsedMs));
 
 		// todos os métodos foram processados
 		if (timer.size() == 4) {
-			final String vsep = "\n+----------------------+--------------+";
+			final String vsep = "\n+----------------------+----------+";
 			StringBuilder report = new StringBuilder();
-			report.append("\nFINAL RESULTS (for ").append(ITERATIONS).append(" iterations):").append(vsep)
-					.append("\n| Method               |    time (ms) |").append(vsep);
-			timer.entrySet().forEach(e -> report.append(String.format("%n| %-20s | %12d |", e.getKey(), e.getValue())));
+			report.append("\nTotal executions: " + ITERATIONS).append("\n\nFINAL RESULTS:").append(vsep)
+					.append("\n| Method               | time(ms) |").append(vsep);
+
+			timer.entrySet().forEach(e -> report.append(String.format("%n| %-20s | %8d |", e.getKey(), e.getValue())));
 			report.append(vsep).append("\n\n");
 			logger.info(report.toString());
 		}

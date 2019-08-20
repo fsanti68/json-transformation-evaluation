@@ -1,0 +1,56 @@
+{
+	"entries": [
+		{
+			"id": "joe@mail.com",
+			"_ref": 30828776483,
+			"attribs": {
+				"type": "email"
+			},
+			"options": []
+		},
+		{
+			"id": "11 99988-3322",
+			"_ref": 30828776483,
+			"attribs": {
+				"type": "mobile",
+				"contract": "92973478662653",
+				"company": "078326873266536434"
+			},
+			"options": [
+				"NOPASSWD"
+			]
+		},
+		{
+			"id": "joe@my.company.com",
+			"_ref": 30828776483,
+			"attribs": {
+				"type": "email"
+			},
+			"options": [
+				"MANAGER",
+				"OWNER",
+				"OTHER"
+			]
+		},
+		{
+			"id": "joe.bog",
+			"_ref": 30828776483,
+			"attribs": {
+				"type": "corporate.id"
+			},
+			"options": []
+		},
+		{
+			"id": "joe498",
+			"_ref": 30828776483,
+			"attribs": {
+				"type": "social",
+				"service": "github"
+			},
+			"pk": "VGhpcyBpcyBvbmx5IGEgdGVzdDogZG8gbm90IGV4cGVjdCB0byBmaW5kIGEgcmVhbCB2YWxpZCBwdWJsaWMga2V5IGhlcmUu",
+			"options": [
+				"USER"
+			]
+		}
+	]
+}

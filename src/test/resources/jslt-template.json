@@ -1,0 +1,28 @@
+let cpf = .user.cpf
+let products = .user.products
+let signature = .user.signature
+
+{
+   "entries":
+   [for (.user.accounts)
+      let key = .key
+      let prd = [for ($products) . if ($key == .account)]
+      let roles = flatten([for ($products) .roles if ($key == .account)])
+      {
+         "id": $key,
+         "_ref": $cpf,
+         "attribs": {
+            for (.) .key: .value if (.key != "key")
+         },
+         "pk": if ($signature.owner == .key) $signature.pub else null,
+         "options":
+            [for (.) "NOPASSWD" if (.key == "type" and .value == "mobile")] +
+            [for ($prd)
+               "ADMIN" if (contains("admin", .roles))
+            ] +
+            [for ($roles)
+               uppercase(.) if (. != "admin")
+            ]
+      }
+   ]
+}
