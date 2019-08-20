@@ -225,9 +225,9 @@ Weaknesses:
 
 
 #### JSLT
-JSLT does not seems to get advantages from parallel processing, but it delivers real fast computation for my use case.
+JSLT does not seems to get expressive advantages from parallel processing, but it delivers real fast computation for my use case since a couple of threads.
 
-Here happened the same as FreeMarker: more that 6 threads is not useful. But it was able to deliver a huge amount of documents: ** 278k** documents transformed with 5 threads pool.
+Here happened the same as FreeMarker: more that 6 threads is not useful. But it was able to deliver a huge amount of documents: **278k** documents transformed with 5 threads pool.
 
 Weaknesses:
 - there are?
