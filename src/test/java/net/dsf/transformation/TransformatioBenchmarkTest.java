@@ -15,7 +15,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import org.apache.commons.io.IOUtils;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,6 +40,7 @@ import freemarker.template.TemplateExceptionHandler;
  * @author Fabio De Santi
  *
  */
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TransformatioBenchmarkTest {
 
 	private static final Logger logger = Logger.getLogger(TransformatioBenchmarkTest.class.getName());
@@ -51,7 +54,7 @@ public class TransformatioBenchmarkTest {
 	private static Map<String, Long> timer = new HashMap<>();
 
 	static {
-		cfg = new Configuration(Configuration.VERSION_2_3_27);
+		cfg = new Configuration(Configuration.VERSION_2_3_28);
 
 		try {
 			cfg.setDirectoryForTemplateLoading(new File(ClassLoader.getSystemResource("templates").getFile()));
@@ -81,7 +84,7 @@ public class TransformatioBenchmarkTest {
 		long ms = 0L;
 		CountDownLatch cdl = new CountDownLatch(ITERATIONS);
 		ThreadPoolExecutor tpe = (ThreadPoolExecutor) Executors.newFixedThreadPool(poolSize);
-		String source = getInput("sample-input.json").toString();
+		String source = getInput("sample-input.json");
 		ms = System.currentTimeMillis();
 
 		for (int l = 0; l < ITERATIONS; l++) {
@@ -147,7 +150,7 @@ public class TransformatioBenchmarkTest {
 	}
 
 	@Test
-	public void freeMarkerTest() throws IOException, TemplateException, InterruptedException {
+	public void testA_FreeMarkerTest() throws IOException, TemplateException, InterruptedException {
 
 		logger.info("FREEMARKER TEST");
 		Template template = cfg.getTemplate("freemarker-template.ftl");
@@ -161,7 +164,7 @@ public class TransformatioBenchmarkTest {
 	}
 
 	@Test
-	public void freeMarkerWithThreadPoolTest() throws IOException, InterruptedException {
+	public void testB_FreeMarkerWithThreadPoolTest() throws IOException, InterruptedException {
 
 		logger.info("FREEMARKER (ThreadPool) TEST");
 		Template template = cfg.getTemplate("freemarker-template.ftl");
@@ -175,7 +178,7 @@ public class TransformatioBenchmarkTest {
 	}
 
 	@Test
-	public void jsltTest() throws IOException, InterruptedException {
+	public void testC_JSLTTest() throws IOException, InterruptedException {
 
 		logger.info("JSLT TEST");
 
@@ -187,7 +190,7 @@ public class TransformatioBenchmarkTest {
 	}
 
 	@Test
-	public void jsltWithThreadPoolTest() throws IOException, InterruptedException {
+	public void testD_JSLTWithThreadPoolTest() throws IOException, InterruptedException {
 
 		logger.info("JSLT (ThreadPool) TEST");
 

@@ -41,7 +41,7 @@ Those results are not considering only the transformation itself since they also
 
 In my tests, I worked with this transformation scenario:
 
-#####Source document:
+###Source document:
 
 ```json
 {
@@ -69,7 +69,7 @@ In my tests, I worked with this transformation scenario:
 }
 ```
 
-#####Transformation template (freemarker):
+###Transformation template (freemarker):
 
 ```text
 <#setting number_format="computer">
@@ -122,7 +122,7 @@ In my tests, I worked with this transformation scenario:
 }
 ```
 
-#####Transformation template (freemarker):
+###Transformation template (JSLT):
 
 ```text
 let cpf = .user.cpf
@@ -155,7 +155,7 @@ let signature = .user.signature
 }
 ```
 
-#####Expected result (output json):
+###Expected result (output json):
 
 ```json
 {
@@ -205,12 +205,12 @@ The next step was to test how does FreeMarker and JSLT scales. I used an Intel C
 
 **1,000,000 json submitted** (lower is better):
 
-![FreeMarker CPU scalability](freemarker-cpu-benchmark.png "FreeMarker's scalability vs thread pool")
+![FreeMarker & JSLT CPU scalability](cpu-benchmark.png "Throughput vs thread pool")
 
 
 ## Conclusions
 
-#### FreeMarker
+### FreeMarker
 It's pretty evident that, for this hardware and scenario, configure the thread pool with more than 6 threads is a waste of resources. But I have to consider that I'm only testing the transformation piece of code:
 
 - computationally intensive
@@ -224,7 +224,7 @@ Weaknesses:
 - freeMarker does not handle separators on arrays, so I had to do that manually (using variables): not really nice to see.
 
 
-#### JSLT
+### JSLT
 JSLT does not seems to get expressive advantages from parallel processing, but it delivers real fast computation for my use case since a couple of threads.
 
 Here happened the same as FreeMarker: more that 6 threads is not useful. But it was able to deliver a huge amount of documents: **278k** documents transformed with 5 threads pool.
