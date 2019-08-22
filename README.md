@@ -218,24 +218,23 @@ It's pretty evident that, for this hardware and scenario, configure the thread p
 
 In real production cases, there will be a lot of I/O (_amqp, kafka_) and thus, a bigger thread pool size should help a lot.
 
-Although it does not scales linearly (as expected, since concurrency and garbage collector plays a big role here), a _6-threaded pool_ was able to deliver a satisfactory result, transforming **122k** documents per second.
+Although it does not scales linearly (as expected, since concurrency, garbage collector and processor thermal throttling may play a big role here), a _6-threaded pool_ was able to deliver a satisfactory result, transforming **147k** documents per second.
 
 Weaknesses:
 - freeMarker does not handle separators on arrays, so I had to do that manually (using variables): not really nice to see.
 
 
 ### JSLT
-JSLT does not seems to get expressive advantages from parallel processing, but it delivers real fast computation for my use case since a couple of threads.
+JSLT does not seems to get expressive advantages from parallel processing with more than 3 threads, but it delivers real fast computation for my use case from the beginning.
 
-Here happened the same as FreeMarker: more that 6 threads is not useful. But it was able to deliver a huge amount of documents: **278k** documents transformed with 5 threads pool.
+Here happened the same as FreeMarker: more that 6 threads is not useful. But it was able to deliver a huge amount of documents: **185k** documents transformed with 6 threads pool.
 
 Weaknesses:
-- there are?
+- not found as far I could explore...
 
 
 I'm surprised with JSLT and in just a couple of hours I was able to break my initial resistance to its template code style/syntax.
 
 For my use case, **JSLT won the most important criteria**:
-- it scales
-- it is fast
-- it is readable and elegant
+- it is faster
+- template is readable and elegant

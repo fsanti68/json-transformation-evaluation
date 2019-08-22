@@ -1,26 +1,29 @@
+def is-type-mobile(x)
+    $x.key == "type" and $x.value == "mobile"
+
 let cpf = .user.cpf
 let products = .user.products
-let signature = .user.signature
+let sign = .user.signature
 
 {
    "entries":
    [for (.user.accounts)
       let key = .key
-      let prd = [for ($products) . if ($key == .account)]
-      let roles = flatten([for ($products) .roles if ($key == .account)])
+      let prdByAcct = [for ($products) . if ($key == .account)]
+      let rolesByAcct = flatten([for ($products) .roles if ($key == .account)])
       {
          "id": $key,
          "_ref": $cpf,
          "attribs": {
             for (.) .key: .value if (.key != "key")
          },
-         "pk": if ($signature.owner == .key) $signature.pub else null,
+         "pk": if ($sign.owner == .key) $sign.pub else null,
          "options":
-            [for (.) "NOPASSWD" if (.key == "type" and .value == "mobile")] +
-            [for ($prd)
-               "ADMIN" if (contains("admin", .roles))
+            [for (.) "NOPASSWD" if ( is-type-mobile(.) )] +
+            [for ($prdByAcct)
+               "MANAGER" if (contains("admin", .roles))
             ] +
-            [for ($roles)
+            [for ($rolesByAcct)
                uppercase(.) if (. != "admin")
             ]
       }

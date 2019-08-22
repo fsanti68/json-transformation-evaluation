@@ -96,7 +96,11 @@ public class TransformatioBenchmarkTest {
 
 					StringWriter out = new StringWriter(4096);
 					template.process(map, out);
-					assertNotNull(out.toString()); // our test case expects result as string
+					String res = out.toString();
+					if (cdl.getCount() == 1L)
+						logger.info(res);
+
+					assertNotNull(res); // our test case expects result as string
 					cdl.countDown();
 
 				} catch (IOException | TemplateException e) {
@@ -136,7 +140,10 @@ public class TransformatioBenchmarkTest {
 							JsonNode o = mapper.readTree(source);
 
 							JsonNode json = jslt.apply(o);
-							assertNotNull(json.asText()); // our test case expects result as string
+							String res = json.toString();
+							if (cdl.getCount() == 1L)
+								logger.info(res);
+							assertNotNull(res); // our test case expects result as string
 							cdl.countDown();
 
 						} catch (IOException e) {
