@@ -12,6 +12,7 @@ Three different transformations were tested:
 FreeMarker won on some criteria:
 - large adoption
 - well documented
+- flexible (supports many other output formats)
 
 JSLT won on performance and readability:
 - faster than FreeMarker
@@ -25,14 +26,14 @@ Those are my new results for 1,000,000 json documents transformation:
 
 ```bash
 *** 1,000,000 json transformed without ThreadPool ***
-        jsltTest   = 11299 ms
-        freeMarker = 34631 ms
+        jsltTest   = 15639 ms
+        freeMarker = 31977 ms
 ```
 
 ```bash
 *** 1,000,000 json transformed with ThreadPool (6 threads) ***
-        jsltTest   =  3766 ms
-        freeMarker =  8141 ms
+        jsltTest   =  5441 ms
+        freeMarker =  7754 ms
 ```
 
 Those results are not considering only the transformation itself since they also include my specific use case: input json and transformed documents will be received and sent as plain text. This means that all data conversions from and to string was part of the measured processing.
@@ -148,7 +149,7 @@ let signature = .user.signature
                "ADMIN" if (contains("admin", .roles))
             ] +
             [for ($roles)
-               uppercase(.) if (. != "admin")
+               uppercase(.) if (. != "admin" and . != "unused")
             ]
       }
    ]
@@ -218,19 +219,20 @@ It's pretty evident that, for this hardware and scenario, configure the thread p
 
 In real production cases, there will be a lot of I/O (_amqp, kafka_) and thus, a bigger thread pool size should help a lot.
 
-Although it does not scales linearly (as expected, since concurrency, garbage collector and processor thermal throttling may play a big role here), a _6-threaded pool_ was able to deliver a satisfactory result, transforming **147k** documents per second.
+Although it does not scales linearly (as expected, since concurrency, garbage collector and processor thermal throttling may play a big role here), a _6-threaded pool_ was able to deliver a satisfactory result, transforming **148k** documents per second.
 
 Weaknesses:
 - freeMarker does not handle separators on arrays, so I had to do that manually (using variables): not really nice to see.
+- freeMarker template format influences results (compare original and minified template).
 
 
 ### JSLT
-JSLT does not seems to get expressive advantages from parallel processing with more than 3 threads, but it delivers real fast computation for my use case from the beginning.
+JSLT does not seems to get expressive advantages from parallel processing with more than 3 threads, but it delivers real fast computation for my use case from the beginning. The same rationale may be valid here (no I/O, lot of computation -> concurrency, GC stuff, thermal throttling).
 
-Here happened the same as FreeMarker: more that 6 threads is not useful. But it was able to deliver a huge amount of documents: **185k** documents transformed with 6 threads pool.
+Here happened the same as FreeMarker: more that 6 threads is not useful. But it was able to deliver a huge amount of documents: **184k** documents transformed with 6 threads pool.
 
 Weaknesses:
-- not found as far I could explore...
+- none as far as I tested
 
 
 I'm surprised with JSLT and in just a couple of hours I was able to break my initial resistance to its template code style/syntax.
@@ -238,3 +240,5 @@ I'm surprised with JSLT and in just a couple of hours I was able to break my ini
 For my use case, **JSLT won the most important criteria**:
 - it is faster
 - template is readable and elegant
+
+FreeMarker is still a good choice for templating, supporting text, XML, HTML and so on.

@@ -2,6 +2,7 @@ package net.dsf.transformation;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -49,9 +50,7 @@ public class ScalabilityTest {
 		if (results.size() == 2 && cpu == CPU_COUNT) {
 			StringBuilder report = new StringBuilder();
 			StringBuilder sep = new StringBuilder();
-			sep.append("\n+----------+");
-			for (int i = 0; i < CPU_COUNT; i++)
-				sep.append("-------+");
+			sep.append("\n------------").append(String.join("", Collections.nCopies(CPU_COUNT, "-------+")));
 			report.append(sep.toString());
 			report.append("\n| Library  |");
 			for (int i = 0; i < CPU_COUNT; i++)

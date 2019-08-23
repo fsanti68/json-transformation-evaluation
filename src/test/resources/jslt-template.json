@@ -24,7 +24,7 @@ let sign = .user.signature
                "MANAGER" if (contains("admin", .roles))
             ] +
             [for ($rolesByAcct)
-               uppercase(.) if (. != "admin")
+               uppercase(.) if (. != "admin" and . != "unused")
             ]
       }
    ]

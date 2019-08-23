@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.schibsted.spt.data.jslt.Expression;
 import com.schibsted.spt.data.jslt.Parser;
 
+import freemarker.core.JSONOutputFormat;
 import freemarker.log.Logger;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -66,6 +67,7 @@ public class TransformatioBenchmarkTest {
 		cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
 		cfg.setLogTemplateExceptions(false);
 		cfg.setWrapUncheckedExceptions(true);
+		cfg.setOutputFormat(JSONOutputFormat.INSTANCE);
 	}
 
 	private String getInput(String resourceName) throws IOException {
